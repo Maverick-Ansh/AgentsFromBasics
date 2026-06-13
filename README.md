@@ -5,9 +5,10 @@ can read every line and understand exactly how AI agents work. One **Manager**
 agent orchestrates **5 specialists** (research, calendar, tasks, booking, email).
 Talk to it in your terminal or **from your phone via Telegram**.
 
-It runs on **Claude Sonnet** today, but every model call goes through one thin
-file (`afb/llm.py`), so you can swap in an **open-source model** later without
-touching any agent code.
+It runs on **Claude Sonnet** out of the box, but every model call goes through
+one thin file (`afb/llm.py`), so you can run it on an **open-source model**
+(Ollama / vLLM / LM Studio / …) by setting a single env var — no agent code
+changes. See [Run on an open-source model](#run-on-an-open-source-model).
 
 ---
 
@@ -138,6 +139,42 @@ Try:
 
 ---
 
+## Run on an open-source model
+
+The whole point of the `afb/llm.py` seam: switch from Claude to a local
+open-source model **without touching any agent code**. Any OpenAI-compatible
+server works — Ollama, vLLM, LM Studio, llama.cpp, LocalAI. The seam translates
+the codebase's Anthropic-shaped messages/tools into the OpenAI format and back,
+so `afb/agent.py` and every specialist stay identical.
+
+Easiest path — **Ollama**:
+
+```bash
+# 1. Install Ollama (https://ollama.com), then pull a tool-capable model:
+ollama pull llama3.1          # qwen2.5 and mistral-nemo also work well
+
+# 2. In .env, point afb at it:
+#      AFB_PROVIDER=openai
+#      AFB_OPENAI_MODEL=llama3.1
+#      AFB_OPENAI_BASE_URL=http://localhost:11434/v1   (the default)
+
+# 3. Run exactly as before — no ANTHROPIC_API_KEY needed:
+python run.py
+```
+
+It prints which backend is active on startup, e.g.
+`🔌 Model backend: openai · llama3.1 @ http://localhost:11434/v1`.
+
+Point `AFB_OPENAI_BASE_URL` at any compatible server (a vLLM endpoint, or LM
+Studio's `http://localhost:1234/v1`) and set `AFB_OPENAI_MODEL` to match.
+
+> **Tool-calling quality varies by model.** Multi-agent delegation leans hard on
+> tool use, so pick a model trained for it (llama3.1, qwen2.5, mistral-nemo).
+> Small models may call the wrong tool or skip tools — a model limitation, not a
+> code one. Switch back to Claude anytime with `AFB_PROVIDER=anthropic`.
+
+---
+
 ## Control it from your phone (Telegram)
 
 1. On Telegram, message **@BotFather** → `/newbot` → follow the prompts.
@@ -173,10 +210,10 @@ prompts don't change.**
   with a real provider (OpenTable, a flights/hotels API, etc.).
 - **Email** → `afb/specialists/comms.py` saves to a local outbox. Replace
   `send_email` with SMTP or the Gmail API.
-- **Open-source model** → `afb/llm.py`. Reimplement `LLM.complete()` against
-  Ollama / vLLM / LM Studio and convert that backend's tool-call format into the
-  same block shape the loop reads. Nothing else in the codebase imports the
-  model SDK.
+- **Open-source model** → `afb/llm.py` — **already implemented.** Set
+  `AFB_PROVIDER=openai` to run on Ollama / vLLM / LM Studio / any
+  OpenAI-compatible server (see [Run on an open-source model](#run-on-an-open-source-model)).
+  Nothing else in the codebase changes.
 
 ---
 
@@ -217,7 +254,8 @@ AgentsFromBasics/
 - Add **streaming** in `llm.py` so replies appear token-by-token.
 - Add a new specialist (Weather? Finance? Notes?) — copy a specialist file,
   give it tools, add one line in `afb/app.py`.
-- Run on a **local open-source model** via `afb/llm.py`.
+- Try different **open-source models** (`AFB_OPENAI_MODEL`) or a hosted vLLM
+  endpoint (`AFB_OPENAI_BASE_URL`).
 - Add **human-in-the-loop approval** before "send email" / "make booking" fires.
 
 Built to be read. Start with `afb/agent.py`.

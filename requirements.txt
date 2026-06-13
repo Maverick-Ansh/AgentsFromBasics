@@ -1,5 +1,7 @@
-# Core: the LLM client. Everything talks to Claude through afb/llm.py.
-anthropic>=0.40
+# Core: the LLM clients. Everything talks to a model through afb/llm.py.
+anthropic>=0.40            # Claude backend           (AFB_PROVIDER=anthropic)
+openai>=1.0               # OpenAI-compatible backend (AFB_PROVIDER=openai):
+                          #   Ollama / vLLM / LM Studio / llama.cpp / LocalAI
 
 # Loads ANTHROPIC_API_KEY / TELEGRAM_BOT_TOKEN from a .env file.
 python-dotenv>=1.0

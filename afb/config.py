@@ -5,10 +5,23 @@ Values can be overridden with environment variables.
 """
 import os
 
-# The model the agents run on. You asked to start on Claude Sonnet.
-# Because every model call goes through afb/llm.py, switching to an
-# open-source model later is a change to that ONE file, not this string.
+# Which model backend the agents run on:
+#   "anthropic" — Claude via the Anthropic API (needs ANTHROPIC_API_KEY)
+#   "openai"    — ANY OpenAI-compatible server: Ollama, vLLM, LM Studio,
+#                 llama.cpp, LocalAI, ... — i.e. how you run an open-source model.
+# Because every model call goes through afb/llm.py, this switch is the ONLY
+# change needed; no agent code is touched.
+PROVIDER = os.environ.get("AFB_PROVIDER", "anthropic").lower()
+
+# --- Anthropic backend ---
 MODEL = os.environ.get("AFB_MODEL", "claude-sonnet-4-6")
+
+# --- OpenAI-compatible backend (open-source / local models) ---
+# Defaults target a local Ollama server. Point these at any compatible endpoint
+# (e.g. LM Studio's http://localhost:1234/v1, or a vLLM server).
+OPENAI_BASE_URL = os.environ.get("AFB_OPENAI_BASE_URL", "http://localhost:11434/v1")
+OPENAI_MODEL = os.environ.get("AFB_OPENAI_MODEL", "llama3.1")
+OPENAI_API_KEY = os.environ.get("AFB_OPENAI_API_KEY", "ollama")  # local servers ignore it
 
 # Upper bound on tokens per model response. 4096 is plenty for chat + tool use.
 MAX_TOKENS = int(os.environ.get("AFB_MAX_TOKENS", "4096"))

@@ -3,7 +3,7 @@
 This is the one place that builds every piece and wires them together, so both
 interfaces (CLI and Telegram) share the exact same brain.
 """
-from .llm import LLM
+from .llm import make_llm
 from .manager import build_manager
 from .memory import LongTermMemory
 from .specialists import booking, calendar, comms, research, tasks
@@ -16,7 +16,7 @@ def build_system(on_event=None):
     `on_event(kind, **info)` is an optional callback the interface can pass to
     watch what's happening (which agent calls which tool). See cli.py.
     """
-    llm = LLM()
+    llm = make_llm()  # backend chosen by AFB_PROVIDER (anthropic | openai)
 
     # Long-term memory: one durable store shared across the whole system.
     long_term_memory = LongTermMemory(Collection("memory"))

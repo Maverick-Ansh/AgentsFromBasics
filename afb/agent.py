@@ -16,8 +16,11 @@ Every "agent framework" you've heard of is, at its core, a fancier version of
 this loop. No magic.
 """
 from . import config
-from .llm import LLM
 from .tools import Tool
+
+# An "llm" here is anything with a `.complete(system, messages, tools)` method
+# that returns an object with `.content` (a list of blocks) and `.stop_reason`.
+# Both backends in afb/llm.py satisfy this — that's the whole point of the seam.
 
 
 def _noop(*_args, **_kwargs):  # default event sink
@@ -30,7 +33,7 @@ class Agent:
         name: str,
         system_prompt: str,
         tools: list[Tool],
-        llm: LLM,
+        llm,
         max_steps: int = config.MAX_STEPS,
         on_event=None,
     ):

@@ -23,13 +23,23 @@ def main() -> None:
         print("usage: python run.py [cli|telegram]")
         sys.exit(1)
 
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+    from afb import config
+
+    if config.PROVIDER in ("anthropic", "claude"):
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            print(
+                "⚠️  ANTHROPIC_API_KEY is not set.\n"
+                "    Copy .env.example to .env and add your key "
+                "(from https://console.anthropic.com/),\n"
+                "    or set AFB_PROVIDER=openai to run on a local/open-source model."
+            )
+            sys.exit(1)
+        print(f"🔌 Model backend: Anthropic · {config.MODEL}")
+    else:
         print(
-            "⚠️  ANTHROPIC_API_KEY is not set.\n"
-            "    Copy .env.example to .env and add your key "
-            "(from https://console.anthropic.com/)."
+            f"🔌 Model backend: {config.PROVIDER} · {config.OPENAI_MODEL} "
+            f"@ {config.OPENAI_BASE_URL}"
         )
-        sys.exit(1)
 
     if mode == "cli":
         from afb.interfaces.cli import main as run_cli
