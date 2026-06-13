@@ -1,0 +1,12 @@
+# Core: the LLM client. Everything talks to Claude through afb/llm.py.
+anthropic>=0.40
+
+# Loads ANTHROPIC_API_KEY / TELEGRAM_BOT_TOKEN from a .env file.
+python-dotenv>=1.0
+
+# Research agent: real (keyless) web search + page fetching.
+ddgs>=6.0
+requests>=2.31
+
+# Phone control. Only needed for `python run.py telegram`.
+python-telegram-bot>=20.0
